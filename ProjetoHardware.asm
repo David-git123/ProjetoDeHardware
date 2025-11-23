@@ -8,7 +8,9 @@ frase6: .asciiz "3 - CIFRA XOR"
 frase7: .asciiz "Digite a opcao: "
 
 msgTexto: .asciiz "Digite o texto para criptografar (max 31 chars): "
+msgTextoD: .asciiz "Digite o texto para descriptografar (max 31 chars): "
 msgResultado: .asciiz "Texto criptografado: "
+msgResultadoD: .asciiz "Texto descriptografado: "
 
 buffer: .space 32
 
@@ -19,7 +21,7 @@ main:
 
     ###### MENU PRINCIPAL ######
 
-    # Linha 1
+    
     li $v0,4
     la $a0, frase1
     syscall
@@ -27,7 +29,7 @@ main:
     li $a0,10
     syscall
 
-    # linha 2
+    
     li $v0,4
     la $a0, frase2
     syscall
@@ -90,28 +92,40 @@ main:
     move $t1, $v0        # 1 = cesar, 2 = rot13, 3 = xor
 
 
-    ########## DESVIO PARA A CIFRA ##########
 
-    li $t2,1
-    beq $t1, $t2, cesar_cripto   # se cifra = 1 → César
-
-
+    # Se cifra == 1 (César)
+    li $t2, 1
+    beq $t1, $t2, cesar_switch
 
     j end
 
 
 
-# ROTINA: CIFRA DE CÉSAR (CRIPT)  
+# Escolhe se vai criptografar ou descripto
+
+
+cesar_switch:
+    li $t3, 1
+    beq $t0, $t3, cesar_cripto     # opção 1 → criptografar
+
+    li $t3, 2
+    beq $t0, $t3, cesar_descripto  # opção 2 → descriptografar
+
+    j end
+
+
+
+  
 
 
 cesar_cripto:
 
-    # exibe pedido de texto
+   
     li $v0,4
     la $a0, msgTexto
     syscall
 
-    # lê string
+ 
     li $v0,8
     la $a0, buffer
     li $a1, 32
@@ -120,23 +134,21 @@ cesar_cripto:
     # chave = 3 (César)
     li $t3, 3
 
-
     la $t4, buffer
 
 cesar_loop:
-    lb $t5, 0($t4)         # caractere atual
+    lb $t5, 0($t4)
 
-    beqz $t5, cesar_fim    
+    beqz $t5, cesar_fim
 
-    add $t5, $t5, $t3      # soma chave
-    sb $t5, 0($t4)         # salva caractere
+    add $t5, $t5, $t3      # criptografar = somar
+    sb $t5, 0($t4)
 
-    addi $t4, $t4, 1       # avança
+    addi $t4, $t4, 1
     j cesar_loop
 
 
 cesar_fim:
-    # mostra texto criptografado
     li $v0,4
     la $a0, msgResultado
     syscall
@@ -148,8 +160,51 @@ cesar_fim:
     j end
 
 
+#   ROTINA: CIFRA DE CÉSAR (DESCRIPT) 
 
-#      FIM DO PROGRAMA           
+
+cesar_descripto:
+
+    # mensagem
+    li $v0,4
+    la $a0, msgTextoD
+    syscall
+
+    # ler string
+    li $v0,8
+    la $a0, buffer
+    li $a1, 32
+    syscall
+
+    # chave = 3
+    li $t3, 3
+
+    la $t4, buffer
+
+cesar_loop_d:
+    lb $t5, 0($t4)
+
+    beqz $t5, cesar_fim_d
+
+    sub $t5, $t5, $t3      # descriptografar = subtrair
+    sb $t5, 0($t4)
+
+    addi $t4, $t4, 1
+    j cesar_loop_d
+
+
+cesar_fim_d:
+    li $v0,4
+    la $a0, msgResultadoD
+    syscall
+
+    li $v0,4
+    la $a0, buffer
+    syscall
+
+    j end
+
+#           FIM DO PROGRAMA           
 
 
 end:
