@@ -97,6 +97,10 @@ main:
     li $t2, 1
     beq $t1, $t2, cesar_switch
 
+    # Se cifra ==2 ( ROT13)
+    li $t2, 2
+    beq $t1, $t2, rot13_switch
+
     j end
 
 
@@ -203,6 +207,58 @@ cesar_fim_d:
     syscall
 
     j end
+ #   CIFRA ROT13
+rot13_switch:
+
+    # Verifica se escolheu cripto
+    li $t3, 1
+    beq $t0, $t3, rot13_exec
+
+    # Ou descripto (ROT13 é igual)
+    li $t3, 2
+    beq $t0, $t3, rot13_exec
+
+    j end
+
+
+rot13_exec:
+
+    # Lê o texto do usuário
+    li $v0,4
+    la $a0, msgTexto
+    syscall
+
+    li $v0,8
+    la $a0, buffer
+    li $a1, 32
+    syscall
+
+    la $t0, buffer     # Ponteiro para o texto
+
+rot13_loop:
+    lb $t1,0($t0)      # Pega caractere atual
+    beqz $t1, rot13_fim
+
+    addi $t1,$t1,13    # ROT13 = somar 13
+    sb $t1,0($t0)
+
+    addi $t0,$t0,1     # Avança para o próximo char
+    j rot13_loop
+
+
+rot13_fim:
+
+    # Exibe resultado
+    li $v0,4
+    la $a0, msgResultado
+    syscall
+
+    li $v0,4
+    la $a0, buffer
+    syscall
+
+    j end
+
 
 #           FIM DO PROGRAMA           
 
