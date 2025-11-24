@@ -97,10 +97,13 @@ main:
     li $t2, 1
     beq $t1, $t2, cesar_switch
 
-    # Se cifra ==2 ( ROT13)
+    # Se cifra ==2 (ROT13)
     li $t2, 2
     beq $t1, $t2, rot13_switch
 
+    # Se cifra ==3 (XOR)
+    li $t2,3
+    beq $t1,$t2, xor_switch
     j end
 
 
