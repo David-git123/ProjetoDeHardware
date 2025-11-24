@@ -1,7 +1,6 @@
 .data
 frase1: .asciiz "UTILITARIO DE CRIPTOGRAFIA"
 frase2: .asciiz "1 - CRIPTOGRAFAR"
-frase3: .asciiz "2 - DESCRIPTOGRAFAR"
 frase4: .asciiz "1 - CIFRA DE CESAR"
 frase5: .asciiz "2 - CIFRA DE ROT13"
 frase6: .asciiz "3 - CIFRA XOR( Chave 7)"
@@ -20,51 +19,9 @@ transformado: .space 32
 .globl main
 main:
 
-    ###### MENU PRINCIPAL ######
-
     
-    li $v0,4
-    la $a0, frase1
-    syscall
-    li $v0,11
-    li $a0,10
-    syscall
-
     
-    li $v0,4
-    la $a0, frase2
-    syscall
-    li $v0,11
-    li $a0,10
-    syscall
-
-    # linha 3
-    li $v0,4
-    la $a0, frase3
-    syscall
-    li $v0,11
-    li $a0,10
-    syscall
     
-
-    ########## LEITURA DAS OPCOES ##########
-
-    # "Digite a opcao"
-    li $v0,4
-    la $a0, frase7
-    syscall
-
-    # opcao 1 = criptografar | 2 = descriptografar
-    li $v0,5
-    syscall
-    move $t0, $v0        # guarda 1 ou 2
-    
-    beq $t0,1, criptografar
-    beq $t0,2, descriptografar
-    
-    fim_do_codigo:
-    li $v0,10
-    syscall
 
     criptografar:
     
@@ -119,7 +76,7 @@ cesar_cripto:
     la $a0, buffer
     li $a1, 32
     syscall
-    move $t4,$v0
+    la $t4,buffer
     
     la $t4, buffer
     la $t5, transformado
@@ -127,13 +84,19 @@ cesar_cripto:
 cesar_loop_cripto:
     
     lb $t6,0($t4)
-    bne $t6,$zero,fim
+    beq $t6,$zero,cesar_fim
     li $t0,'x'
-    bne $t6,$t0,x:
+    beq $t6,$t0,x
     li $t0,'y'
-    bne $t6,$t0,y:
+    beq $t6,$t0,y
     li $t0,'z'
-    bne $t6,$t0,z:
+    beq $t6,$t0,z
+    
+    addi $t6,$t6,3
+    sb $t6,0($t5)
+    addi $t5,$t5,1
+    addi $t4,$t4,1
+    j cesar_loop_cripto
     
     x:
     li $t6,'a'
@@ -156,19 +119,15 @@ cesar_loop_cripto:
     addi $t4,$t4,1
     j cesar_loop_cripto
     
-    addi $t6,$t6,3
-    sb $t6,0($t5)
-    addi $t5,$t5,1
-    addi $t4,$t4,1
-    j cesar_loop_cripto
     
-    fim:
+    cesar_fim:
     li $v0,4
     la $a0, msgResultado
     syscall
     
-    la $a0,transformado
+    
     li $v0,4
+    la $a0,transformado
     syscall
     
     
@@ -190,31 +149,31 @@ rot13_cripto:
 rot13_loop_cripto:
     
     lb $t6,0($t4)
-    bne $t6,$zero,fim
+    beq $t6,$zero,rot13_fim
     addi $t6,$t6,13
-    bgt $t6,'Z',fora_intervalo
+    bgt $t6,'z',fora_intervalo
     
     sb $t6,0($t5)
     addi $t4,$t4,1
     addi $t5,$t5,1
-    j rot13_loop_cripto: 
+    j rot13_loop_cripto 
     
     fora_intervalo:
-    subi $t6,$t6,-26
+    addi $t6,$t6,-26
     
     sb $t6,0($t5)
     addi $t4,$t4,1
     addi $t5,$t5,1
-    j rot13_loop_cripto: 
+    j rot13_loop_cripto
     
-    fim:
+    rot13_fim:
     la $a0,transformado
     li $v0,4
     syscall
     
     j fim_do_codigo
     
-cifra_xor:
+  xor_cripto:
 
     li $v0,4
     la $a0, msgTexto
@@ -224,7 +183,7 @@ cifra_xor:
     la $a0, buffer
     li $a1, 32
     syscall
-    move $t4,$v0
+    la $t4,buffer
     la $t4,buffer 
     la $t5, transformado
     
@@ -232,15 +191,15 @@ cifra_xor:
 cifra_xor_loop:
     
     lb $t6,0($t4)
-    bne $t6,$zero,fim
-    xor $t6,$t6,t0
+    beq $t6,$zero,xor_fim
+    xor $t6,$t6,$t0
     sb $t6,0($t5)
     addi $t4,$t4,1
     addi $t5,$t5,1  
     
     j cifra_xor_loop
         
-    fim:
+    xor_fim:
     
     li $v0,4
     la $a0,transformado
@@ -248,8 +207,9 @@ cifra_xor_loop:
     
    j fim_do_codigo	
     
-    
-     
+    fim_do_codigo:
+    li $v0,10
+    syscall
 
 	
 
