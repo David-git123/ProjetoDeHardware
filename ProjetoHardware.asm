@@ -7,7 +7,6 @@ frase6: .asciiz "3 - CIFRA XOR( Chave 7)"
 frase7: .asciiz "Digite a opcao: "
 
 msgTexto: .asciiz "Digite o texto para criptografar (max 31 chars): "
-msgTextoD: .asciiz "Digite o texto para descriptografar (max 31 chars): "
 msgResultado: .asciiz "Texto criptografado: "
 
 
